@@ -71,22 +71,36 @@ Pipeline cần chứng minh dữ liệu xấu tác động đến RAG và dữ l
 |---|---|
 | Input | Raw records JSON; baseline clean JSON; test set gồm `id`, `question_type`, `question`, `ground_truth`, `ground_truth_doc_ids`; cấu hình model/top-k |
 | Output | Clean/corrupted/repaired CSV và JSON; ba Chroma collection; answers, metrics, quality/freshness, corruption log và Markdown reports |
+| Cấu hình lần xác minh | MiniLM `all-MiniLM-L6-v2`; `top_k=4`; Gemini `gemini-2.5-flash-lite`; `USE_LLM_EVAL=false`; `RUN_RAGAS=false` |
 | Module phụ thuộc | `ingestion.cleaning`, `retrieval.index`, `evaluation.qa`, `evaluation.metrics`, `observability.quality`, `observability.reporting` |
 | Module sử dụng output | Script entrypoints, UI evaluation, group/individual report và phần demo |
 | Điều kiện lỗi cần xử lý | Thiếu baseline artifact; sai schema; orphan ground-truth ID; dùng trùng path/collection; test set/config/hash thay đổi; raw snapshot bị mutate; repaired IDs/hash không khớp baseline |
 
 ### Cách xác minh
 
-```powershell
-$env:USE_LLM_EVAL='false'
-.\.venv\Scripts\python.exe script\run_phase1.py
-.\.venv\Scripts\python.exe script\run_corruption_flow.py
-.\.venv\Scripts\python.exe -m pytest -q
+```bash
+USE_LLM_EVAL=false RUN_RAGAS=false .venv/bin/python script/run_phase1.py
+USE_LLM_EVAL=false RUN_RAGAS=false HF_HUB_OFFLINE=1 .venv/bin/python script/run_corruption_flow.py
+HF_HUB_OFFLINE=1 .venv/bin/python -m pytest -q
 ```
 
 - **Kết quả mong đợi:** Hai flow exit code 0; corrupted khác baseline đúng theo log; repaired phục hồi baseline; report khớp JSON.
-- **Kết quả thực tế:** `baseline=24`, `corrupted=23`, `repaired=24`, `operations=6`; 8 test passed.
+- **Kết quả thực tế ngày 2026-08-06:** `baseline=24`, `corrupted=23`, `repaired=24`, `operations=6`; `8 passed in 30.81s`.
 - **Artifact/log:** `data/results/corruption_log.json`, ba file metrics trong `data/results/`, quality/freshness trong `data/quality/` và `data/reports/corruption_report.md`.
+
+### Bằng chứng của lần chạy xác minh gần nhất
+
+| Hạng mục | Giá trị xác minh |
+|---|---|
+| Runtime | Python 3.11.11 trên macOS; raw snapshot hiện có được tái sử dụng (`source_refreshed=false`) |
+| Raw snapshot SHA-256 | `1b7968d4ff39b2523ecfdfb5f776586a0a116a6048ec5133443e6f930c01115b` |
+| Baseline clean SHA-256 | `7c97d6a2ad3f96a930c762f9512d395cdf0739f91b96fbe1bd5853b695fcc77f` |
+| Repaired clean SHA-256 | `7c97d6a2ad3f96a930c762f9512d395cdf0739f91b96fbe1bd5853b695fcc77f` |
+| Test set SHA-256 | `c3eb850f3c8cc4d5108c72bcbe1d9e5655bb28854917196c513fe0152b921d75` |
+| Chroma collections | `papers-baseline=24`, `papers-corrupted=23`, `papers-repaired=24` embeddings; dimension 384 |
+| Evaluation | 32 samples/trạng thái; `llm_answer_count=0`, `fallback_answer_count=32`; Ragas được chủ động bỏ qua |
+
+Hash baseline clean và repaired clean trùng tuyệt đối, trong khi raw snapshot và test set giữ nguyên xuyên suốt hai flow. Đây là bằng chứng trực tiếp rằng repair tái tạo lại đúng dữ liệu sạch từ nguồn raw thay vì sao chép hoặc sửa tay corrupted dataset.
 
 ## 5. Một quyết định kỹ thuật quan trọng
 
@@ -128,7 +142,7 @@ Ba trạng thái phải dùng cùng test set, evaluator và `top_k` để metric
 | Quality checks | PASS | FAIL | PASS | Missing summary/duplicate làm corrupted không đạt contract |
 | Freshness status | PASS | FAIL | PASS | Một row bị làm cũ 3.650 ngày khiến freshness fail |
 
-Các số liệu trên được tạo với `USE_LLM_EVAL=false`: cả 32 samples ở ba trạng thái dùng cùng fallback evaluator, `llm_answer_count=0`. Vì vậy đây là so sánh nhất quán trong chế độ local/fallback, không phải bằng chứng về chất lượng của OpenAI LLM.
+Các số liệu trên được tạo với `USE_LLM_EVAL=false`: cả 32 samples ở ba trạng thái dùng cùng fallback evaluator, `llm_answer_count=0`. Vì vậy đây là so sánh nhất quán trong chế độ local/fallback, không phải bằng chứng về chất lượng của Gemini hoặc một LLM provider bên ngoài.
 
 ### Kết luận từ số liệu
 
