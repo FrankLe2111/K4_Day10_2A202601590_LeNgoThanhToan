@@ -75,7 +75,7 @@ Owner chịu trách nhiệm chính cho module được giao, nhưng không đồ
 
 ## 4. Phần việc và báo cáo vai trò của thành viên
 
-Nhóm phân công các khối dưới đây cho từng thành viên. Mỗi khối có một owner chính; owner có thể nhận nhiều khối khi nhóm ít người, nhưng phải nêu rõ phạm vi trong `individual_report.md`.
+Nhóm phân công các khối dưới đây cho từng thành viên. Mỗi khối có một owner chính; owner có thể nhận nhiều khối khi nhóm ít người, nhưng phải nêu rõ phạm vi trong `LeNgoThanhToan_report.md`.
 
 | Khối                      | File trọng tâm                                                      | Output cần kiểm tra                                            |
 | -------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------- |
