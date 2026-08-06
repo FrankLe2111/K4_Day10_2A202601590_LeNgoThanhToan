@@ -7,7 +7,7 @@ from typing import Any
 import chromadb
 import pandas as pd
 
-from core.config import Settings
+from core.config import Settings, load_settings
 from core.utils import read_json, safe_slug, write_json
 from retrieval.embeddings import MiniLMEmbeddings
 
@@ -172,3 +172,16 @@ class LocalEmbeddingIndex:
         if needle in self.documents_by_title:
             return self.documents_by_title[needle]
         return None
+
+if __name__ == "__main__":
+    settings = load_settings()
+    if settings.paths.embeddings_json.exists():
+        index = LocalEmbeddingIndex.load(settings)
+    else:
+        clean_df = pd.read_csv(settings.paths.clean_csv)
+        index = LocalEmbeddingIndex.build(clean_df, settings, settings.paths.embeddings_json)
+    query = "What is the LLM paper?"
+    results = index.search(query, top_k=5)
+    print(f"Query: {query}")
+    for result in results:
+        print(f"Paper ID: {result.paper_id}, Title: {result.title}, Score: {result.score:.4f}")

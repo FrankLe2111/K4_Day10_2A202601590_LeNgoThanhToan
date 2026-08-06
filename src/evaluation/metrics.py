@@ -122,6 +122,7 @@ def evaluate_pipeline(
                 "ground_truth": item["ground_truth"],
                 "ground_truth_doc_ids": item["ground_truth_doc_ids"],
                 "answer": result.answer,
+                "answer_mode": result.answer_mode,
                 "retrieved_doc_ids": result.retrieved_doc_ids,
                 "retrieved_contexts": result.retrieved_contexts,
                 "retrieval_hit": retrieval_hit,
@@ -132,6 +133,8 @@ def evaluate_pipeline(
 
     summary = {
         "samples": len(answers),
+        "llm_answer_count": sum(item["answer_mode"] == "llm" for item in answers),
+        "fallback_answer_count": sum(item["answer_mode"] != "llm" for item in answers),
         "retrieval_hit_rate": mean(1.0 if item["retrieval_hit"] else 0.0 for item in answers),
         "mean_token_f1": mean(item["token_f1"] for item in answers),
         "judge_accuracy": mean(1.0 if item["judge"]["correct"] else 0.0 for item in answers),

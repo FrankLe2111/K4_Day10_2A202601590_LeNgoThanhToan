@@ -108,12 +108,12 @@ macOS/Linux:
 cp .env.example .env
 ```
 
-Mặc định project dùng Gemini:
+Mặc định project dùng OpenAI:
 
 ```dotenv
-LLM_PROVIDER=gemini
-LLM_MODEL=gemini-2.5-flash
-GOOGLE_API_KEY=your_key_here
+LLM_PROVIDER=openai
+LLM_MODEL=gpt-4o-mini
+OPENAI_API_KEY=your_key_here
 ```
 
 Project cũng hỗ trợ `openai`, `anthropic`, `openrouter`, `ollama` và OpenAI-compatible custom endpoint. Chỉ điền credential của provider bạn sử dụng.
@@ -160,6 +160,28 @@ grep -RInE 'TODO\(student\)|NotImplementedError' src
 Hoặc dùng chức năng Search của VS Code với từ khóa `TODO(student)`.
 
 ## 5. Thứ tự thực hiện
+
+## Demo UI bằng Streamlit
+
+Sau khi chạy baseline và có dữ liệu trong `data/`, khởi động giao diện:
+
+```bash
+streamlit run app.py
+```
+
+UI gồm các màn hình:
+
+- **Overview:** trạng thái artifact, metrics, quality và freshness.
+- **Semantic Search:** tìm kiếm top-k paper bằng embedding/ChromaDB.
+- **Ask RAG:** hỏi đáp bằng OpenAI LLM với local retrieval context.
+- **Evaluation:** xem baseline answers, metrics và corruption comparison.
+- **Clean Data:** xem và lọc cleaned dataset.
+
+Nếu chưa có index, hãy chạy trước:
+
+```bash
+python script/run_phase1.py
+```
 
 ### Pha 1 - Baseline với dữ liệu sạch
 
@@ -232,7 +254,7 @@ Mục tiêu không chỉ là pipeline chạy xong, mà phải có bằng chứng
 | ----------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `requires a different Python`                       | Python nằm ngoài khoảng 3.11-3.13                 | Chạy`python --version`, chọn Python phù hợp rồi tạo lại `.venv`          |
 | `No module named 'pipelines'`                       | Mới cài`requirements.txt`, chưa cài project    | Trong`.venv`, chạy `python -m pip install -e .`                                |
-| `GOOGLE_API_KEY is required`                        | Provider mặc định là Gemini nhưng chưa có key | Điền`GOOGLE_API_KEY` hoặc đổi `LLM_PROVIDER` sang provider đã cấu hình |
+| `OPENAI_API_KEY is required`                        | Provider mặc định là OpenAI nhưng chưa có key | Điền`OPENAI_API_KEY` hoặc đổi `LLM_PROVIDER` sang provider đã cấu hình |
 | `NotImplementedError: Student task...`              | Chạm tới phần starter chưa implement             | Mở đúng file được ghi trong traceback và hoàn thành`TODO(student)`       |
 | Crossref trả`429`/`503`                          | Rate limit hoặc lỗi tạm thời                     | Implement retry/backoff theo yêu cầu trong`src/ingestion/crossref.py`           |
 | Chạy corruption flow nhưng thiếu baseline artifact | Chưa chạy xong Pha 1                               | Chạy baseline và kiểm tra`data/results/baseline_metrics.json` trước          |
