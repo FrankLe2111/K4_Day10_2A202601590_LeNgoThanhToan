@@ -7,25 +7,30 @@ import re
 from typing import Any, Iterable
 
 
-def ensure_parent(path: Path) -> None:
+def ensure_parent(path: Path | str) -> None:
+    path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
 
-def write_json(path: Path, payload: Any) -> None:
+def write_json(path: Path | str, payload: Any) -> None:
+    path = Path(path)
     ensure_parent(path)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
-def read_json(path: Path) -> Any:
+def read_json(path: Path | str) -> Any:
+    path = Path(path)
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def write_csv(df, path: Path) -> None:
+def write_csv(df, path: Path | str) -> None:
+    path = Path(path)
     ensure_parent(path)
     df.to_csv(path, index=False)
 
 
-def write_text(path: Path, text: str) -> None:
+def write_text(path: Path | str, text: str) -> None:
+    path = Path(path)
     ensure_parent(path)
     path.write_text(text, encoding="utf-8")
 

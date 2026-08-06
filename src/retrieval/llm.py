@@ -5,7 +5,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 
-from core.config import Settings, normalized_provider, require_llm_credentials
+from core.config import Settings, load_settings, normalized_provider, require_llm_credentials
 
 
 def build_llm(settings: Settings, temperature: float = 0.0):
@@ -51,3 +51,10 @@ def build_llm(settings: Settings, temperature: float = 0.0):
             temperature=temperature,
         )
     raise RuntimeError(f"Unsupported LLM provider: {settings.llm_provider}")
+
+if __name__ == "__main__":
+    settings = load_settings()
+    llm = build_llm(settings)
+    print(f"LLM provider: {settings.llm_provider}")
+    print(f"LLM model: {settings.model_name}")
+    print(f"LLM temperature: {llm.temperature}")

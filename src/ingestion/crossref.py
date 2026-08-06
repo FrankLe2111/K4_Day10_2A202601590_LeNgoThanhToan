@@ -1,3 +1,10 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+import json
+from pathlib import Path
+import re
+import time
 import re
 import time
 from dataclasses import asdict, dataclass
@@ -68,6 +75,22 @@ def _choose_date(item: dict[str, Any], field_names: list[str]) -> tuple[str, str
         if precision == "invalid":
             return "", field_name, precision
     return "", "missing", "missing"
+
+
+def _clean_text(value: object) -> str:
+    text = str(value or "")
+    text = re.sub(r"<[^>]+>", " ", text)
+    return " ".join(text.split())
+
+
+def _parse_date(value: dict) -> str:
+    parts = value.get("date-parts", [[]])[0] if isinstance(value, dict) else []
+    if not parts:
+        return ""
+    year = int(parts[0])
+    month = int(parts[1]) if len(parts) > 1 else 1
+    day = int(parts[2]) if len(parts) > 2 else 1
+    return f"{year:04d}-{month:02d}-{day:02d}"
 
 
 def parse_crossref_payload(payload: dict) -> list[PaperRecord]:
