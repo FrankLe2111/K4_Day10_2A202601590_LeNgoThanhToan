@@ -5,9 +5,10 @@ from typing import Any
 from langchain.agents import create_agent
 from langchain.tools import tool
 
-from core.config import Settings
+from core.config import Settings,load_settings
 from retrieval.index import LocalEmbeddingIndex
 from retrieval.llm import build_llm
+from retrieval.qa import answer_question
 
 
 def build_agent(settings: Settings, index: LocalEmbeddingIndex):
@@ -57,3 +58,20 @@ def run_agent_question(agent: Any, question: str) -> str:
         return ""
     final_message = messages[-1]
     return getattr(final_message, "content", str(final_message))
+
+if __name__ == "__main__":
+    settings = load_settings()
+    index = LocalEmbeddingIndex.load(settings, settings.paths.embeddings_json)
+    agent = build_agent(settings, index)
+    question = "What is the main contribution of 'Retrieval-Augmented Large Language Model Agents for Automated Scientific Literature Review Generation'?"
+    try:
+        answer = run_agent_question(agent, question)
+        mode = "LLM agent"
+    except Exception as exc:
+        # Keep the demo usable when a provider is out of quota or unavailable.
+        result = answer_question(question, settings, index)
+        answer = result.answer
+        mode = f"local retrieval fallback ({type(exc).__name__})"
+    print(f"Question: {question}")
+    print(f"Mode: {mode}")
+    print(f"Answer: {answer}")
