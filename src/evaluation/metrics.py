@@ -46,6 +46,14 @@ def _token_f1(reference: str, prediction: str) -> float:
 
 
 def _judge_answer(settings: Settings, question: str, reference: str, prediction: str) -> JudgeVerdict:
+    use_llm = os.getenv("USE_LLM_EVAL", "true").lower() in {"1", "true", "yes"}
+    if not use_llm:
+        score = _token_f1(reference, prediction)
+        return JudgeVerdict(
+            score=5 if score >= 0.95 else 3 if score >= 0.5 else 1,
+            correct=score >= 0.5,
+            reasoning="Local heuristic judge used because USE_LLM_EVAL is disabled.",
+        )
     prompt = f"""
 Evaluate the model answer against the reference answer.
 
@@ -109,9 +117,10 @@ def evaluate_pipeline(
 ) -> EvaluationBundle:
     test_set = read_json(test_set_path)
     answers: list[dict[str, Any]] = []
+    use_llm = os.getenv("USE_LLM_EVAL", "true").lower() in {"1", "true", "yes"}
 
     for item in test_set:
-        result = answer_question(item["question"], settings=settings, index=index)
+        result = answer_question(item["question"], settings=settings, index=index, use_llm=use_llm)
         judge = _judge_answer(settings, item["question"], item["ground_truth"], result.answer)
         retrieval_hit = any(doc_id in item["ground_truth_doc_ids"] for doc_id in result.retrieved_doc_ids)
         answers.append(
