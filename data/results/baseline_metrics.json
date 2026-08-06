@@ -8,5 +8,18 @@
   "mean_judge_score": 5,
   "ragas": {
     "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+  },
+  "pipeline_config": {
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "top_k": 4,
+    "llm_provider": "openai",
+    "llm_model": "gpt-4o-mini",
+    "use_llm_eval": false,
+    "run_ragas": false,
+    "freshness_threshold_days": 180,
+    "raw_snapshot_sha256": "d82106ef3025a87a98d3159da832260fe864bcd01376543a6cf70e6b1d4cb1d8",
+    "baseline_clean_sha256": "5eb5f6cf1d9dc078cd3727d62049f81c830a4c04bfa661866a34382c106f1fae",
+    "test_set_sha256": "fc624145a506d3ae2046df9e162493df64815bf4e02c945a35acfb8edd39772e",
+    "clean_run_date": "2026-08-06"
   }
 }
