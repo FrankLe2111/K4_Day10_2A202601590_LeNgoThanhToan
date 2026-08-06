@@ -14,6 +14,7 @@ pytest.importorskip("datasets")
 pytest.importorskip("chromadb")
 
 from core.utils import write_json
+from observability.reporting import generate_corruption_report
 from pipelines.corruption_flow import (
     _assert_repaired_ids_match,
     _load_json_dataframe,
@@ -102,3 +103,21 @@ def test_corruption_log_envelope_and_exact_repair_id_validation(tmp_path) -> Non
     repaired = pd.DataFrame({"paper_id": ["paper-1", "paper-3"]})
     with pytest.raises(RuntimeError, match="did not restore"):
         _assert_repaired_ids_match(baseline, repaired)
+
+
+def test_corruption_report_contains_metric_deltas(tmp_path) -> None:
+    report_path = tmp_path / "comparison.md"
+    generate_corruption_report(
+        report_path,
+        baseline_metrics={"retrieval_hit_rate": 1.0},
+        corrupted_metrics={"retrieval_hit_rate": 0.75},
+        repaired_metrics={"retrieval_hit_rate": 1.0},
+        corrupted_quality={"passed": False},
+        repaired_quality={"passed": True},
+        corrupted_freshness={"is_fresh": False},
+        repaired_freshness={"is_fresh": True},
+    )
+
+    report = report_path.read_text(encoding="utf-8")
+    assert "Corrupted - baseline" in report
+    assert "| retrieval_hit_rate | 1.0 | 0.75 | 1.0 | -0.25 | 0.0 |" in report

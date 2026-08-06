@@ -5,9 +5,9 @@
 | Metric | Baseline | Corrupted | Repaired |
 |---|---:|---:|---:|
 | retrieval_hit_rate | 1.0 | 0.75 | 1.0 |
-| mean_token_f1 | 1.0 | 0.3542997073433204 | 1.0 |
-| judge_accuracy | 1.0 | 0.3125 | 1.0 |
-| mean_judge_score | 5 | 2.1875 | 5 |
+| mean_token_f1 | 1.0 | 0.7579196481812761 | 1.0 |
+| judge_accuracy | 1.0 | 0.75 | 1.0 |
+| mean_judge_score | 5 | 4 | 5 |
 
 ## Quality and freshness
 

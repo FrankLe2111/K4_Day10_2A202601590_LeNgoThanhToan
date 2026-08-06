@@ -1,7 +1,7 @@
 {
   "backend": "chroma",
   "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
-  "persist_path": "/home/aic/K4_Day10_2A202601590_LeNgoThanhToan/data/chroma",
+  "persist_path": "C:\\CodeLabK4\\K4_Day10_2A202601590_LeNgoThanhToan\\data\\chroma",
   "collection_name": "papers-repaired",
   "documents": [
     {

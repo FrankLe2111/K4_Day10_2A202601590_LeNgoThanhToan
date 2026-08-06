@@ -52,9 +52,26 @@ def generate_corruption_report(
 ) -> None:
     """Write the baseline/corrupted/repaired comparison report."""
     metric_keys = ("retrieval_hit_rate", "mean_token_f1", "judge_accuracy", "mean_judge_score")
-    lines = ["# Corruption and Repair Report", "", "## Metric comparison", "", "| Metric | Baseline | Corrupted | Repaired |", "|---|---:|---:|---:|"]
+    lines = [
+        "# Corruption and Repair Report",
+        "",
+        "## Metric comparison",
+        "",
+        "| Metric | Baseline | Corrupted | Repaired | Corrupted - baseline | Repaired - baseline |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
     for key in metric_keys:
-        lines.append(f"| {key} | {baseline_metrics.get(key, 'N/A')} | {corrupted_metrics.get(key, 'N/A')} | {repaired_metrics.get(key, 'N/A')} |")
+        baseline = baseline_metrics.get(key)
+        corrupted = corrupted_metrics.get(key)
+        repaired = repaired_metrics.get(key)
+        corrupted_delta = corrupted - baseline if isinstance(baseline, (int, float)) and isinstance(corrupted, (int, float)) else "N/A"
+        repaired_delta = repaired - baseline if isinstance(baseline, (int, float)) and isinstance(repaired, (int, float)) else "N/A"
+        lines.append(
+            f"| {key} | {baseline if baseline is not None else 'N/A'} | "
+            f"{corrupted if corrupted is not None else 'N/A'} | "
+            f"{repaired if repaired is not None else 'N/A'} | "
+            f"{corrupted_delta} | {repaired_delta} |"
+        )
     lines += ["", "## Quality and freshness", "", "| State | Quality | Fresh |", "|---|---|---|"]
     lines.append(f"| Corrupted | {corrupted_quality.get('passed')} | {corrupted_freshness.get('is_fresh')} |")
     lines.append(f"| Repaired | {repaired_quality.get('passed')} | {repaired_freshness.get('is_fresh')} |")
