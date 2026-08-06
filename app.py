@@ -34,7 +34,12 @@ def get_settings():
 def get_index():
     settings = get_settings()
     if settings.paths.embeddings_json.exists():
-        return LocalEmbeddingIndex.load(settings, settings.paths.embeddings_json)
+        try:
+            return LocalEmbeddingIndex.load(settings, settings.paths.embeddings_json)
+        except Exception:
+            # The manifest may be present in a fresh clone while Chroma's local
+            # binary store is absent; rebuild it from the clean CSV.
+            pass
     if not settings.paths.clean_csv.exists():
         raise FileNotFoundError("Chưa có clean dataset. Hãy chạy baseline pipeline trước.")
     clean_df = pd.read_csv(settings.paths.clean_csv)
