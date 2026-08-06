@@ -1,0 +1,52 @@
+{
+  "report_name": "baseline",
+  "total_rows": 24,
+  "passed": true,
+  "checks": [
+    {
+      "name": "row_count",
+      "passed": true,
+      "details": {
+        "value": 24,
+        "minimum": 1
+      }
+    },
+    {
+      "name": "paper_id_not_null",
+      "passed": true,
+      "details": {
+        "null_rows": 0
+      }
+    },
+    {
+      "name": "paper_id_unique",
+      "passed": true,
+      "details": {
+        "duplicate_rows": 0
+      }
+    },
+    {
+      "name": "title_not_blank",
+      "passed": true,
+      "details": {
+        "blank_rows": 0
+      }
+    },
+    {
+      "name": "summary_has_content",
+      "passed": true,
+      "details": {
+        "short_or_blank_rows": 0,
+        "minimum_chars": 100
+      }
+    },
+    {
+      "name": "freshness",
+      "passed": true,
+      "details": {
+        "stale_rows": 0,
+        "threshold_days": 180
+      }
+    }
+  ]
+}
