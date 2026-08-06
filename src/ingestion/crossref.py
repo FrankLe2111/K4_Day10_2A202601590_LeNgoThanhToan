@@ -1,7 +1,6 @@
 import re
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -20,7 +19,11 @@ class PaperRecord:
     categories: list[str]
     primary_category: str
     published: str
+    published_source: str
+    published_date_precision: str
     updated: str
+    updated_source: str
+    updated_date_precision: str
     abs_url: str
     pdf_url: str
     comment: str
@@ -32,24 +35,39 @@ def _clean_xml_tags(text: str) -> str:
     cleaned = re.sub(r"<[^>]+>", " ", text)
     return normalize_whitespace(cleaned)
 
-def _extract_date(date_struct: dict[str, Any] | None) -> str:
-    # Trích xuất chuỗi ngày dạng YYYY-MM-DD từ dict date-parts của Crossref an toàn 100%
-    fallback = datetime.now().strftime("%Y-%m-%d")
+def _extract_date(date_struct: dict[str, Any] | None) -> tuple[str, str]:
+    # Trích xuất chuỗi ngày dạng YYYY-MM-DD từ dict date-parts của Crossref.
+    # Không tự gán ngày hiện tại khi nguồn thiếu/sai ngày, vì freshness phải
+    # truy vết được dữ liệu thật thay vì dữ liệu fallback bị bịa.
     if not date_struct or not isinstance(date_struct, dict) or "date-parts" not in date_struct:
-        return fallback
+        return "", "missing"
 
     date_parts = date_struct.get("date-parts", [[]])
     if not isinstance(date_parts, list) or not date_parts or not isinstance(date_parts[0], list) or not date_parts[0]:
-        return fallback
+        return "", "missing"
 
     parts = date_parts[0]
     try:
-        year = int(parts[0]) if len(parts) > 0 and parts[0] is not None else 2026
+        if len(parts) == 0 or parts[0] is None:
+            return "", "missing"
+        year = int(parts[0])
         month = int(parts[1]) if len(parts) > 1 and parts[1] is not None else 1
         day = int(parts[2]) if len(parts) > 2 and parts[2] is not None else 1
-        return f"{year:04d}-{month:02d}-{day:02d}"
+        precision = "day" if len(parts) >= 3 else "month" if len(parts) == 2 else "year"
+        return f"{year:04d}-{month:02d}-{day:02d}", precision
     except (ValueError, TypeError):
-        return fallback
+        return "", "invalid"
+
+
+def _choose_date(item: dict[str, Any], field_names: list[str]) -> tuple[str, str, str]:
+    for field_name in field_names:
+        value = item.get(field_name)
+        date_value, precision = _extract_date(value if isinstance(value, dict) else None)
+        if date_value:
+            return date_value, field_name, precision
+        if precision == "invalid":
+            return "", field_name, precision
+    return "", "missing", "missing"
 
 
 def parse_crossref_payload(payload: dict) -> list[PaperRecord]:
@@ -104,11 +122,14 @@ def parse_crossref_payload(payload: dict) -> list[PaperRecord]:
             categories = ["General"]
         primary_category = categories[0]
 
-        pub_struct = item.get("published-online") or item.get("published-print") or item.get("issued")
-        published = _extract_date(pub_struct if isinstance(pub_struct, dict) else None)
-
-        dep_struct = item.get("deposited") or item.get("indexed") or pub_struct
-        updated = _extract_date(dep_struct if isinstance(dep_struct, dict) else None)
+        published, published_source, published_precision = _choose_date(
+            item,
+            ["published-online", "published-print", "issued"],
+        )
+        updated, updated_source, updated_precision = _choose_date(
+            item,
+            ["deposited", "indexed", "published-online", "published-print", "issued"],
+        )
 
         abs_url = str(item.get("URL", "") or f"https://doi.org/{doi}")
 
@@ -135,7 +156,11 @@ def parse_crossref_payload(payload: dict) -> list[PaperRecord]:
                 categories=categories,
                 primary_category=primary_category,
                 published=published,
+                published_source=published_source,
+                published_date_precision=published_precision,
                 updated=updated,
+                updated_source=updated_source,
+                updated_date_precision=updated_precision,
                 abs_url=abs_url,
                 pdf_url=pdf_url,
                 comment=comment,
@@ -213,7 +238,11 @@ def load_raw_records(path: Path) -> list[PaperRecord]:
                 categories=item.get("categories", []),
                 primary_category=item.get("primary_category", "General"),
                 published=item.get("published", ""),
+                published_source=item.get("published_source", ""),
+                published_date_precision=item.get("published_date_precision", ""),
                 updated=item.get("updated", ""),
+                updated_source=item.get("updated_source", ""),
+                updated_date_precision=item.get("updated_date_precision", ""),
                 abs_url=item.get("abs_url", ""),
                 pdf_url=item.get("pdf_url", ""),
                 comment=item.get("comment", ""),
