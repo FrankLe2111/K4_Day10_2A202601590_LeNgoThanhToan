@@ -109,8 +109,8 @@ def load_settings(project_dir: Path | None = None) -> Settings:
     )
 
     return Settings(
-        llm_provider=os.getenv("LLM_PROVIDER", "gemini"),
-        model_name=os.getenv("LLM_MODEL", "gemini-2.5-flash"),
+        llm_provider=os.getenv("LLM_PROVIDER", "openai"),
+        model_name=os.getenv("LLM_MODEL", "gpt-4o-mini"),
         google_api_key=os.getenv("GOOGLE_API_KEY"),
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
@@ -125,7 +125,7 @@ def load_settings(project_dir: Path | None = None) -> Settings:
         repaired_collection_name="papers-repaired",
         source_api="Crossref REST API",
         source_query="agentic retrieval augmented generation large language model",
-        source_filter=f"from-pub-date:{source_from_date},has-abstract:true",
+        source_filter=f"from-pub-date:{source_from_date}",
         max_results=24,
         top_k=4,
         freshness_threshold_days=freshness_threshold_days,
