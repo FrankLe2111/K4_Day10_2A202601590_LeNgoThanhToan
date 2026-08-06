@@ -6,20 +6,19 @@
 
 | Thông tin         | Nội dung                  |
 | ------------------ | -------------------------- |
-| Khóa/Lớp         | [K3 hoặc K4]              |
-| Tên nhóm         | [Tên hoặc mã nhóm]     |
-| Repository         | [Đường dẫn repository] |
-| Ngày hoàn thành | [YYYY-MM-DD]               |
+| Khóa/Lớp         | [K4]              |
+| Tên nhóm         | [VinCourse]     |
+| Repository         | [https://github.com/FrankLe2111/K4_Day10_2A202601590_LeNgoThanhToan] |
+| Ngày hoàn thành | [2026-08-06]               |
 
 ### Thành viên và phân công
 
 | STT | Họ và tên | MSSV | Vai trò chính | Module/deliverable sở hữu |
 | --: | --- | --- | --- | --- |
-| 1 | [Họ tên] | [MSSV] | [Vai trò] | [File, hàm hoặc artifact] |
-| 2 | [Họ tên] | [MSSV] | [Vai trò] | [File, hàm hoặc artifact] |
-| 3 | [Họ tên] | [MSSV] | [Vai trò] | [File, hàm hoặc artifact] |
-| 4 | [Nếu có] | [MSSV] | [Vai trò] | [File, hàm hoặc artifact] |
-| 5 | [Nếu có] | [MSSV] | [Vai trò] | [File, hàm hoặc artifact] |
+| 1 | Nguyễn Đức Hưng | 2A202601936 | Role 1 - Source owner | `src/ingestion/crossref.py`; raw response, raw records và schema đầu vào |
+| 2 | Giang Trung Quân | 2A202601098 | Role 2 - Data model & evaluation-set owner | `src/ingestion/cleaning.py`, `src/evaluation/testset.py`; cleaned dataset, `text_for_embedding` và evaluation set |
+| 3 | Lê Ngô Thanh Toàn | 2A202601590 | Role 3 - Observability owner | `src/observability/quality.py`, `src/observability/reporting.py`; quality checks, freshness và Markdown reports |
+| 4 | Tạ Thị Thu Huyền | 2A202601782 | Role 4 - Corruption & integration owner | `src/ingestion/corruption.py`, `src/pipelines/phase1.py`, `src/pipelines/corruption_flow.py`; baseline/corrupted/repaired flow và metrics so sánh |
 
 ## 2. Tóm tắt kết quả
 
@@ -58,13 +57,27 @@ Crossref API
 
 | Khối             | Input          | Xử lý chính             | Output/artifact          | Owner          |
 | ----------------- | -------------- | -------------------------- | ------------------------ | -------------- |
-| Ingestion         | [Nguồn/input] | [Fetch, retry, parse...]   | [Đường dẫn artifact] | [Thành viên] |
-| Cleaning          | [Input]        | [Các quy tắc chính]     | [Đường dẫn artifact] | [Thành viên] |
-| Embedding/index   | [Input]        | [Model/index config]       | [Đường dẫn artifact] | [Thành viên] |
-| Evaluation        | [Input]        | [Test set và metrics]     | [Đường dẫn artifact] | [Thành viên] |
-| Observability     | [Input]        | [Quality/freshness checks] | [Đường dẫn artifact] | [Thành viên] |
-| Corruption/repair | [Input]        | [Corruption và repair]    | [Đường dẫn artifact] | [Thành viên] |
-| Orchestration     | [Input]        | [Thứ tự chạy]           | [Reports/metrics]        | [Thành viên] |
+| Ingestion         | Crossref API | Fetch, retry, parse payload, lưu raw response/raw records | `data/raw/` | Nguyễn Đức Hưng |
+| Cleaning          | Raw records trong `data/raw/` | Chuẩn hóa schema, loại record lỗi, deduplicate, tạo `text_for_embedding`, tính `age_days` | `data/clean/` | Giang Trung Quân |
+| Embedding/index   | Cleaned dataset | Dùng MiniLM và ChromaDB để tạo vector index | `data/embeddings/` | Tạ Thị Thu Huyền |
+| Evaluation        | Cleaned dataset và vector index | Tạo test set, chạy evaluator và tính metrics | `data/eval/`, `data/results/` | Giang Trung Quân, Tạ Thị Thu Huyền |
+| Observability     | Clean/corrupted/repaired datasets và metrics | Quality checks, freshness monitoring, tạo Markdown reports | `data/quality/`, `data/reports/` | Lê Ngô Thanh Toàn |
+| Corruption/repair | Baseline cleaned dataset và raw records | Tạo data corruption, rebuild index, evaluate, repair từ raw/source và so sánh | `data/results/corruption_log.json`, corrupted/repaired metrics, comparison report | Tạ Thị Thu Huyền |
+| Orchestration     | Output của tất cả module | Ghép `phase1.py`, `corruption_flow.py`, chạy entrypoint và kiểm tra artifact | `data/reports/phase1_report.md`, `data/reports/corruption_report.md` | Tạ Thị Thu Huyền |
+
+### Contract checkpoint 1 cần chốt
+
+Tại thời điểm checkpoint 1, nhóm mới bắt đầu triển khai nên các schema dưới đây là contract dự kiến để các role cùng bám theo. Nhóm sẽ cập nhật lại nếu code thực tế hoặc dữ liệu Crossref yêu cầu thay đổi.
+
+| Contract | Quy ước dự kiến |
+| --- | --- |
+| Raw schema | Mỗi paper record có `paper_id`, `title`, `summary`, `authors`, `categories`, `primary_category`, `published`, `published_source`, `published_date_precision`, `updated`, `updated_source`, `updated_date_precision`, `abs_url`, `pdf_url`, `comment` |
+| Clean schema | Giữ các trường chính từ raw, chuẩn hóa kiểu dữ liệu, thêm `text_for_embedding`, `age_days`, các cờ tracking như `published_valid`, `published_missing`, `published_in_future`; loại record không có `paper_id` hoặc `title` |
+| Document identity | Dùng `paper_id` từ Crossref DOI làm document ID chính; không tự tạo ID từ title/date nếu thiếu DOI ở bước ingestion hiện tại |
+| Evaluation set | Mỗi sample có `question`, `ground_truth`, `ground_truth_doc_ids`, `question_type`; tất cả `ground_truth_doc_ids` phải tồn tại trong cleaned dataset |
+| Artifact paths | Dùng đúng paths trong `src/core/config.py`: `data/raw/`, `data/clean/`, `data/eval/`, `data/results/`, `data/quality/`, `data/reports/` |
+| Metrics | Giữ cùng `retrieval_hit_rate`, `mean_token_f1`, `judge_accuracy`, `mean_judge_score` cho baseline/corrupted/repaired |
+| Repair | Repair bằng cách rebuild từ raw records/source đáng tin cậy, không sửa tay metrics hoặc answers |
 
 ## 4. Cách tái hiện kết quả
 
