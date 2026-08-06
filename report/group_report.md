@@ -32,9 +32,9 @@ Crossref API -> raw response/records -> cleaning -> clean CSV/JSON
 | Khối | Xử lý | Artifact | Owner |
 |---|---|---|---|
 | Ingestion | Query, filter, retry, parse DOI/title/abstract/authors/dates | `data/raw/` | Nguyễn Đức Hưng |
-| Cleaning | Remove XML, validate, deduplicate, build semantic text | `data/clean/` | Giang Trung Quân |
+| Cleaning | Normalize text/list/date, deduplicate DOI, build clean schema and semantic text | `data/clean/` | Giang Trung Quân |
 | Embedding/index | MiniLM 384 chiều, Chroma cosine search, top-k=4 | `data/embeddings/` | Tạ Thị Thu Huyền |
-| Evaluation | Test set, retrieval hit, Token F1, judge | `data/eval/`, `data/results/` | Giang Trung Quân, Lê Ngô Thanh Toàn |
+| Evaluation | Evidence-backed test set, retrieval hit, Token F1, judge | `data/eval/`, `data/results/` | Giang Trung Quân, Lê Ngô Thanh Toàn |
 | Observability | Completeness, uniqueness, summary validity, freshness | `data/quality/` | Lê Ngô Thanh Toàn |
 | Corruption/repair | Inject lỗi, re-index, rebuild từ raw, compare | `data/results/`, `data/reports/` | Tạ Thị Thu Huyền |
 | UI | Overview, search, Ask RAG, evaluation, data explorer | `app.py` | Lê Ngô Thanh Toàn |
@@ -66,13 +66,20 @@ streamlit run app.py
 
 ## 5. Ingestion và cleaning contract
 
-`paper_id` là DOI ổn định và là document ID. Record thiếu DOI/title hoặc summary sau cleaning dưới 100 ký tự bị loại. Abstract ưu tiên `abstract`, fallback `description`. XML/HTML bị loại khỏi text. Authors/categories được flatten thành `authors_joined`/`categories_joined`. Published date chuyển thành `YYYY-MM-DD`; `age_days` được tính từ ngày chạy pipeline.
+`paper_id` là DOI ổn định và là document ID. Ở bước cleaning, record thiếu DOI/title bị loại vì downstream cần identity và nhãn tài liệu rõ ràng; duplicate DOI được khử theo lowercase. Summary ngắn không bị xóa trực tiếp trong cleaning mà được giữ lại để quality check phát hiện bằng rule `summary_has_content` với ngưỡng 100 ký tự. Authors/categories được chuẩn hóa thành list không trùng lặp, rồi flatten thành `authors_joined`/`categories_joined`. Published date được parse về `YYYY-MM-DD` khi hợp lệ; các ngày thiếu/sai format giữ rỗng kèm flag `published_valid`, `published_missing`, `published_date_precision`, và `age_days` được tính từ ngày chạy pipeline khi có ngày hợp lệ.
 
 `text_for_embedding`:
 
 ```text
-Title: [title] | Authors: [authors_joined] | Summary: [summary]
+Title: [title]
+Summary: [summary]
+Authors: [authors_joined]
+Categories: [categories_joined]
+Venue: [comment]
+Published: [published]
 ```
+
+Các field rỗng được bỏ qua khi tạo `text_for_embedding`; riêng `Published` chỉ được đưa vào khi `published_valid=true`. Cách này giúp embedding có đủ ngữ nghĩa cho retrieval nhưng không đưa dữ liệu ngày tháng không đáng tin vào context.
 
 Crossref retry các status `429`, `502`, `503`, `504` bằng exponential backoff. Raw response được lưu trước khi parse để có thể audit/repair.
 
@@ -89,7 +96,7 @@ Crossref retry các status `429`, `502`, `503`, `504` bằng exponential backoff
 | Answer mode hiện tại | local deterministic fallback |
 | Ragas | Chưa chạy; bật bằng `RUN_RAGAS=1` |
 
-Cùng một test set được dùng ở cả ba state để chênh lệch metrics chỉ phản ánh chất lượng dữ liệu/index, không phản ánh thay đổi câu hỏi.
+Cùng một test set được dùng ở cả ba state để chênh lệch metrics chỉ phản ánh chất lượng dữ liệu/index, không phản ánh thay đổi câu hỏi. Test set được sinh từ clean DataFrame theo nguyên tắc có bằng chứng: chỉ tạo câu hỏi `summary`, `authors`, `date`, `categories` khi field nguồn tương ứng tồn tại; riêng câu hỏi `date` yêu cầu `published_valid=true`. Mỗi sample giữ `ground_truth_doc_ids` theo DOI để retrieval hit rate kiểm tra được tài liệu đúng có nằm trong top-k hay không.
 
 ## 7. Artifact checklist
 
