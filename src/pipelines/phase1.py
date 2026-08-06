@@ -1,3 +1,9 @@
+"""Điều phối pipeline baseline từ dữ liệu thô đến báo cáo đánh giá.
+
+Module tạo dữ liệu sạch, chỉ mục tìm kiếm, test set và các artifact quan sát chất lượng.
+Kết quả baseline là mốc chuẩn để so sánh với trạng thái corrupted và repaired.
+"""
+
 from __future__ import annotations
 
 from datetime import date, datetime

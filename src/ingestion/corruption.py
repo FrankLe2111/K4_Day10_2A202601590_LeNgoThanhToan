@@ -1,3 +1,9 @@
+"""Tạo các lỗi dữ liệu có kiểm soát trên bản sao của clean DataFrame.
+
+Các corruption được áp dụng theo cách xác định để kết quả có thể tái lập và kiểm thử.
+Mọi thay đổi before/after được ghi vào JSON log phục vụ truy vết và đánh giá repair.
+"""
+
 from __future__ import annotations
 
 from collections.abc import Iterable

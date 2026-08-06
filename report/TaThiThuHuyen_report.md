@@ -1,5 +1,11 @@
 # Báo cáo cá nhân — Day 10: Data Pipeline & Data Observability
 
+<!--
+File này tổng hợp vai trò, phần việc và kết quả cá nhân của Tạ Thị Thu Huyền.
+Báo cáo tập trung vào quá trình tạo corruption, điều phối repair flow và kiểm thử tích hợp.
+Các số liệu và artifact được dùng làm bằng chứng cho khả năng phục hồi của pipeline.
+-->
+
 ## 1. Thông tin cá nhân
 
 | Thông tin | Nội dung |

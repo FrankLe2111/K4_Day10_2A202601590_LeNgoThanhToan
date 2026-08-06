@@ -1,3 +1,9 @@
+"""Điều phối luồng tạo corruption, đo tác động và phục hồi dữ liệu.
+
+Module tái sử dụng các artifact baseline để bảo đảm phép so sánh nhất quán.
+Dữ liệu repaired được dựng lại từ raw snapshot rồi kiểm tra với baseline ban đầu.
+"""
+
 from __future__ import annotations
 
 from datetime import UTC, date, datetime, time
