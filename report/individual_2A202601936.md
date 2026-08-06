@@ -1,10 +1,10 @@
-# Báo cáo cá nhân – Nguyễn Đức Hùng
+# Báo cáo cá nhân – Nguyễn Đức Hưng
 
 ## 1. Thông tin cá nhân
 
 | Thông tin | Nội dung |
 |---|---|
-| Họ và tên | Nguyễn Đức Hùng |
+| Họ và tên | Nguyễn Đức Hưng |
 | MSSV | 2A202601936 |
 | Khóa/Lớp | K4 |
 | Tên nhóm | VinCourse |
@@ -189,6 +189,6 @@ $env:PYTHONPATH="src"; python -c "import pandas as pd; from core.config import l
 - [x] Báo cáo không chứa API key, token hoặc secret.
 - [x] Đã kiểm tra biên dịch và chạy thành công pipeline.
 
-**Họ và tên:** Nguyễn Đức Hùng<br>
+**Họ và tên:** Nguyễn Đức Hưng<br>
 **MSSV:** 2A202601936<br>
 **Ngày xác nhận:** 2026-08-06
