@@ -6,8 +6,8 @@ Thư mục `report/` cung cấp mẫu báo cáo cho **bài tập bắt buộc l�
 
 Mỗi nhóm nộp:
 
-1. Một [`vincourse_report.md`](vincourse_report.md) đại diện cho kết quả chung của nhóm.
-2. Thành viên Lê Ngô Thanh Toàn hoàn thành [`LeNgoThanhToan_report.md`](LeNgoThanhToan_report.md) để mô tả vai trò, phần việc, kết quả và mức hiểu trong nhóm.
+1. Một [`group_report.md`](group_report.md) đại diện cho kết quả chung của nhóm.
+2. Mỗi thành viên dùng tên file theo MSSV, ví dụ [`individual_2A202601590.md`](individual_2A202601590.md) và [`individual_2A202601936.md`](individual_2A202601936.md).
 
 Khi cần lưu nhiều báo cáo thành viên trong cùng repository, nhóm nên tạo bản sao theo quy ước:
 
@@ -96,7 +96,7 @@ Trình tự phụ thuộc cần giữ:
 5. Dùng lại cùng evaluation set cho baseline, corrupted và repaired.
 6. Đọc artifacts và metrics trước khi viết kết luận.
 
-Trong `LeNgoThanhToan_report.md`, thành viên cần phân biệt rõ:
+Trong `individual_[MSSV].md`, mỗi thành viên cần phân biệt rõ:
 
 - phần đã hoàn thành;
 - phần mới dừng ở mức thử nghiệm;
@@ -210,8 +210,8 @@ Không đánh dấu hoàn thành nếu report mô tả kết quả không khớp
 - [ ] Có danh sách thành viên, vai trò, phạm vi và output của từng người.
 - [ ] Mỗi deliverable có owner và output rõ ràng.
 - [ ] Một thành viên có thể chạy lại toàn bộ pipeline từ hướng dẫn chung.
-- [ ] `vincourse_report.md` khớp với code, artifacts và metrics.
-- [ ] `LeNgoThanhToan_report.md` mô tả đúng vai trò và phần việc cá nhân.
+- [ ] `group_report.md` khớp với code, artifacts và metrics.
+- [ ] Các file `individual_[MSSV].md` mô tả đúng vai trò và phần việc cá nhân.
 - [ ] Tất cả thành viên có thể giải thích luồng end-to-end và phần mình phụ trách.
 - [ ] Không có `.env`, API key hoặc secret trong repository, report hoặc log.
 
