@@ -1,0 +1,12 @@
+{
+  "samples": 32,
+  "llm_answer_count": 0,
+  "fallback_answer_count": 32,
+  "retrieval_hit_rate": 0.75,
+  "mean_token_f1": 0.3542997073433204,
+  "judge_accuracy": 0.3125,
+  "mean_judge_score": 2.1875,
+  "ragas": {
+    "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+  }
+}
