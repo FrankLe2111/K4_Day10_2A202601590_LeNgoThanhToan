@@ -1,0 +1,39 @@
+[
+  {
+    "operation": "drop_latest_records",
+    "paper_ids": [
+      "10.2118/234689-pa",
+      "10.1007/s10278-026-02086-9"
+    ]
+  },
+  {
+    "operation": "blank_summary",
+    "paper_ids": [
+      "10.21203/rs.3.rs-10178277/v1"
+    ]
+  },
+  {
+    "operation": "truncate_title",
+    "paper_ids": [
+      "10.2196/preprints.106157"
+    ]
+  },
+  {
+    "operation": "inject_summary_noise",
+    "paper_ids": [
+      "10.3390/buildings16132637"
+    ]
+  },
+  {
+    "operation": "make_date_stale",
+    "paper_ids": [
+      "10.21079/11681/50309"
+    ]
+  },
+  {
+    "operation": "add_duplicate",
+    "paper_ids": [
+      "10.1111/exsy.70341"
+    ]
+  }
+]
